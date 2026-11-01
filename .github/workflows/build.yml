@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'index.html'
+      - 'p5.txt'
   workflow_dispatch:
 
 permissions:
@@ -24,6 +24,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+
+      - name: Rebuild index.html from parts
+        run: |
+          cat p1.txt p2.txt p3.txt p4.txt p5.txt | tr -d '\n\r ' | base64 -d | xz -d > index.html
+          echo "86871b7fc7798471bfe0bf4e5e4b20b2115a4ef0e7368c32325e88fb8021beed  index.html" | sha256sum -c -
+          wc -l index.html
 
       - name: Create Android project from index.html
         run: |
