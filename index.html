@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0b14">
+<title>Anime AI Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Pacifico&family=Permanent+Marker&family=Orbitron:wght@800&family=Hind:wght@700&family=Noto+Sans+Devanagari:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b14;--card:#15152a;--card2:#1d1d38;--line:#2b2b4d;--tx:#eceaff;--mut:#8f8fb5;--ac:#a855f7;--ac2:#ec4899;--ok:#22c55e;--bad:#ef4444;--r:14px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Roboto,sans-serif}
+#app{max-width:760px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 14px 24px;padding-top:max(14px,env(safe-area-inset-top))}
+.tab{display:none}.tab.on{display:block}
+nav{display:flex;border-top:1px solid var(--line);background:#0e0e1c;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:9px 2px 8px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button i{font-style:normal;font-size:20px}
+nav button.on{color:#fff}nav button.on i{filter:drop-shadow(0 0 6px var(--ac))}
+h1{font-size:20px;margin:2px 0 12px}h2{font-size:16px;margin:16px 0 8px}h3{font-size:14px;margin:12px 0 6px;color:var(--mut);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+input,select,textarea{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px;font:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+textarea{min-height:76px;resize:vertical}
+input[type=range]{padding:0;accent-color:var(--ac)}
+input[type=checkbox]{width:auto}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.row>.fit{flex:0 0 auto}
+.btn{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
+.btn:active{transform:scale(.97)}.btn[disabled]{opacity:.5}
+.btn.pri{background:linear-gradient(135deg,var(--ac),var(--ac2));border:0;font-weight:700;color:#fff}
+.btn.bad{border-color:#7f1d1d;color:#fca5a5}.btn.sm{padding:6px 9px;font-size:12.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--card2);color:var(--tx);padding:6px 10px;border-radius:99px;font-size:13px}
+.chip.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent;color:#fff}
+.mut{color:var(--mut);font-size:12.5px}.ok{color:var(--ok)}.bad-t{color:var(--bad)}
+.bar{height:8px;background:var(--card2);border-radius:9px;overflow:hidden;margin:8px 0}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));transition:width .3s}
+.log{font:12px/1.5 ui-monospace,monospace;color:#b9b9dd;max-height:150px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.hidden{display:none!important}
+.pl{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}.pl:first-child{border-top:0}.pl>div{flex:1;min-width:0}.pl b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* editor */
+.pv{background:#000;border-radius:12px;overflow:hidden;display:flex;justify-content:center}
+.pv canvas{max-width:100%;max-height:38vh;background:#000}
+.ctl{display:flex;gap:8px;align-items:center;margin:8px 0}.ctl input[type=range]{flex:1}.ctl span{font-size:12px;color:var(--mut);min-width:84px;text-align:right}
+.strip{display:flex;gap:6px;overflow-x:auto;padding:6px 0 10px;scroll-snap-type:x proximity}
+.th{flex:0 0 auto;width:78px;border:2px solid transparent;border-radius:9px;background:var(--card2);overflow:hidden;position:relative;scroll-snap-align:start}
+.th.on{border-color:var(--ac)}.th img,.th .ph{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#222}
+.th.v img,.th.v .ph{aspect-ratio:9/16;height:100px;width:100%}
+.th small{position:absolute;left:3px;top:2px;background:#000a;border-radius:5px;padding:0 4px;font-size:10px}
+.th em{position:absolute;right:3px;bottom:2px;font-style:normal;font-size:12px}
+.fxg{display:flex;flex-wrap:wrap;gap:6px}
+.stat{display:flex;gap:10px;font-size:12px;color:var(--mut);flex-wrap:wrap}
+.msg{padding:9px 11px;border-radius:12px;margin:8px 0;max-width:92%;word-break:break-word}
+.msg.u{background:linear-gradient(135deg,var(--ac),var(--ac2));margin-left:auto;color:#fff}.msg.a{background:var(--card2);border:1px solid var(--line)}
+.idea{background:var(--card);border:1px solid var(--ac);border-radius:12px;padding:10px;margin:8px 0}
+.ov{position:fixed;inset:0;background:#05050bf2;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+#toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:#222244;border:1px solid var(--ac);border-radius:12px;padding:9px 14px;font-size:13px;z-index:99;max-width:90%;display:none}
+a{color:#c4b5fd}
+/* editor v2 */
+.pvwrap{display:grid;place-items:center;background:#000;border-radius:12px;overflow:hidden}
+.pvwrap canvas{grid-area:1/1;max-width:100%;max-height:38vh;width:auto;height:auto}
+#ov{touch-action:none;background:transparent}
+.tools,.addbar{display:flex;gap:6px;overflow-x:auto;padding:4px 0;scrollbar-width:none}.tools .btn,.addbar .btn{white-space:nowrap;flex:0 0 auto}
+#tl{position:relative;overflow:auto;background:#0e0e1c;border:1px solid var(--line);border-radius:12px;max-height:260px;margin:6px 0}
+#tlIn{position:relative;min-width:100%}
+.ruler{position:absolute;left:0;top:0;height:20px;border-bottom:1px solid var(--line);touch-action:none}
+.rt{position:absolute;top:0;height:20px;border-left:1px solid #3b3b66;padding-left:3px;font-size:10px;color:var(--mut);pointer-events:none}
+.blk{position:absolute;border-radius:7px;overflow:hidden;font-size:11px;color:#fff;border:2px solid transparent;background:#2a2a52;display:flex;align-items:center;padding:0 5px;white-space:nowrap;user-select:none}
+.blk.sc{background-size:cover;background-position:center;text-shadow:0 1px 3px #000}
+.blk.on{border-color:#fff;touch-action:none;z-index:3}
+.blk.t-text{background:#7c3aed}.blk.t-sticker{background:#db2777}.blk.t-image{background:#0891b2}.blk.t-video{background:#2563eb}.blk.t-audio{background:#16a34a}.blk.t-cap{background:#b45309}.blk.t-shape{background:#ca8a04}
+.blk i{position:absolute;top:0;bottom:0;width:16px;display:none;background:#fff;opacity:.85;touch-action:none}.blk.on i{display:block}
+.blk i.hl{left:0;border-radius:5px 0 0 5px}.blk i.hr{right:0;border-radius:0 5px 5px 0}
+#ph{position:absolute;top:0;left:0;width:2px;background:#ff3b6b;z-index:5;pointer-events:none}
+.emo{display:flex;flex-wrap:wrap;gap:4px}.emo button{font-size:26px;background:var(--card2);border:1px solid var(--line);border-radius:10px;width:46px;height:46px}
+.cue{display:flex;gap:6px;align-items:center;margin:6px 0}.cue input[type=number]{width:70px;flex:0 0 70px}.cue input[type=text]{flex:1}
+input[type=color]{padding:2px;height:38px}
+
+</style>
+</head>
+<body>
+<div id="app">
+<main>
+
+<!-- ============ BANAO ============ -->
+<section id="t-gen" class="tab on">
+  <h1>✨ Anime AI Studio</h1>
+  <div class="card">
+    <label>Video ka idea / kahani</label>
+    <textarea id="idea" placeholder="Jaise: Ek anaath ladka jo sapne mein dragon se mila aur duniya bachane nikla..."></textarea>
+    <label>Genre</label>
+    <div class="chips" id="genres"></div>
+    <div class="row">
+      <div><label>Platform</label>
+        <select id="aspect"><option value="16:9">YouTube / Facebook (16:9)</option><option value="9:16">Shorts / Reels (9:16)</option><option value="1:1">Instagram post (1:1)</option></select></div>
+      <div><label>Awaaz / text ki bhasha</label>
+        <select id="lang"><option value="en">English</option><option value="hi">Hindi (देवनागरी)</option><option value="hinglish">Hinglish</option></select></div>
+    </div>
+    <label>Video kitne minute ka? (30 min tak test hua nahi, pehle 1-2 min try karo)</label>
+    <div class="row"><input id="mins" type="number" min="1" max="60" value="2"><div class="chips fit" id="minChips"></div></div>
+    <label><input type="checkbox" id="voiceOn" checked> Narration awaaz banao</label>
+    <button class="btn pri" id="btnGen" style="width:100%;margin-top:12px">🎬 Banana shuru karo</button>
+  </div>
+
+  <div class="card hidden" id="job">
+    <b id="jobTitle">Ban raha hai...</b>
+    <div class="bar"><i id="jobBar"></i></div>
+    <div class="mut" id="jobSub"></div>
+    <div class="log" id="jobLog"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn bad" id="jobStop">⏹ Roko</button>
+      <button class="btn" id="jobRetry">🔁 Fail wale dobara</button>
+      <button class="btn pri" id="jobOpen">🎞 Editor</button>
+    </div>
+  </div>
+
+  <h2>Meri videos</h2>
+  <div class="card" id="plist"><span class="mut">Abhi koi project nahi.</span></div>
+</section>
+
+<!-- ============ EDITOR ============ -->
+<section id="t-edit" class="tab">
+  <div id="edEmpty" class="card mut">Pehle "Banao" tab se video banao, ya neeche se apne photo/video import karo.
+    <div style="margin-top:10px"><button class="btn" id="btnNewBlank">➕ Khaali project (apne photo/video)</button></div></div>
+  <div id="edMain" class="hidden">
+    <div class="row" style="margin-bottom:6px"><b id="edTitle" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></b>
+      <button class="btn sm fit" id="btnBack">📂 Projects</button></div>
+    <div class="pvwrap"><canvas id="cv"></canvas><canvas id="ov"></canvas></div>
+    <div class="ctl"><button class="btn sm fit" id="pPrev">⏮</button><button class="btn sm fit pri" id="pPlay">▶</button><input type="range" id="pSeek" min="0" max="1000" value="0"><span id="pTime">0:00 / 0:00</span></div>
+    <div class="tools">
+      <button class="btn sm" id="bUndo">↶ Undo</button><button class="btn sm" id="bRedo">↷ Redo</button><button class="btn sm" id="bSplit">✂ Split</button>
+      <button class="btn sm" id="bDup">⧉ Copy</button><button class="btn sm bad" id="bDel">🗑 Delete</button><button class="btn sm" id="bZm">🔍−</button><button class="btn sm" id="bZp">🔍+</button>
+    </div>
+    <div id="tl"><div id="tlIn"></div></div>
+    <div class="addbar">
+      <button class="btn sm" id="btnAddAI">🖼 AI scene</button><button class="btn sm" id="btnAddMedia">📁 Photo/Video</button>
+      <button class="btn sm" id="aText">T Text</button><button class="btn sm" id="aSticker">😀 Sticker</button><button class="btn sm" id="aOverlay">🎞 Overlay</button>
+      <button class="btn sm" id="aAudio">🎵 Audio</button><button class="btn sm" id="aSfx">🔊 SFX</button><button class="btn sm" id="aVoice">🎙 Voice</button><button class="btn sm" id="aCaps">💬 Captions</button><button class="btn sm" id="aShape">⬛ Shape</button><button class="btn sm" id="aTpl">📋 Templates</button><button class="btn sm" id="aAuto">🤖 Auto Edit</button>
+    </div>
+    <div class="card" id="panel"></div>
+
+    <div class="card">
+      <b>🎛 Poori video ke settings</b>
+      <div class="row"><label style="margin-top:12px"><input type="checkbox" id="gSubs"> Subtitles / captions dikhao</label></div>
+      <div class="row"><div><label>Subtitle font</label><select id="gSubFont"></select></div><div><label>Position</label><select id="gSubPos"><option value="bottom">Neeche</option><option value="middle">Beech</option><option value="top">Upar</option></select></div></div>
+      <div class="row"><div><label>Size</label><input type="range" id="gSubSize" min="0.6" max="1.8" step="0.05"></div><div class="fit"><label>Color</label><input type="color" id="gSubColor" style="width:54px;height:38px;padding:2px"></div><div class="fit"><label>Peeche box</label><input type="checkbox" id="gSubBg"></div></div>
+      <label>Watermark / channel naam (kone mein)</label><input id="gWm" placeholder="@mychannel">
+      <label>Video fade in/out (sec, shuru aur ant mein kaala)</label><input type="range" id="gVFade" min="0" max="3" step="0.1">
+      <label>Background music (apni audio file)</label>
+      <div class="row"><button class="btn sm" id="btnMusic">🎵 Music chuno</button><button class="btn sm bad" id="btnMusicDel">Hatao</button></div>
+      <div class="row" style="margin-top:8px"><select id="gMood"><option value="epic">Epic</option><option value="sad">Sad</option><option value="calm">Calm</option><option value="action">Action</option></select><button class="btn sm fit" id="btnAiMusic">🎼 Music banao (auto)</button></div>
+      <label>Music volume</label><input type="range" id="gMusicVol" min="0" max="100">
+      <div class="row"><div><label>Music fade in (sec)</label><input type="range" id="gMFin" min="0" max="8" step="0.5"></div><div><label>Music fade out (sec)</label><input type="range" id="gMFout" min="0" max="8" step="0.5"></div></div>
+      <span class="mut" id="musicName"></span>
+    </div>
+
+    <div class="card">
+      <b>📤 Video file banao (export)</b>
+      <p class="mut">Video phone par real-time mein record hoti hai: 10 min ki video = 10 min lagenge. Screen on rakho aur app band mat karo.</p>
+      <div class="row">
+        <div><label>Quality</label><select id="xRes"><option value="720">720p (HD)</option><option value="480">480p (halka)</option><option value="1080">1080p (Full HD, bhaari, dheere)</option></select></div>
+        <div><label>File kitne min ki</label><select id="xPart"><option value="5">5 min ke parts</option><option value="10" selected>10 min ke parts</option><option value="0">Poori ek file</option></select></div>
+      </div>
+      <button class="btn pri" id="btnExport" style="width:100%;margin-top:12px">🎥 Export shuru karo</button>
+      <div id="xOut"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHAT ============ -->
+<section id="t-chat" class="tab">
+  <h1>💬 Trend AI</h1>
+  <div class="card">
+    <div class="mut">YouTube ke asli trending videos padh kar AI unke jaise <b>naye, original</b> video ideas deta hai. Instagram/Facebook ka trending data public nahi milta, wahan AI apni samajh se batata hai.</div>
+    <div class="row" style="margin-top:8px">
+      <div><label>Desh</label><select id="cRegion"><option>US</option><option>IN</option><option>GB</option><option>JP</option><option>CA</option><option>AU</option><option>BR</option></select></div>
+      <div><label>Category</label><select id="cCat"><option value="">Sab</option><option value="1">Film &amp; Animation</option><option value="20">Gaming</option><option value="24">Entertainment</option><option value="10">Music</option><option value="23">Comedy</option></select></div>
+      <div><label>Platform</label><select id="cPlat"><option>YouTube</option><option>YouTube Shorts</option><option>Instagram Reels</option><option>Facebook</option></select></div>
+    </div>
+    <label><input type="checkbox" id="cLive" checked> Live YouTube trending data lo (YouTube API key chahiye)</label>
+  </div>
+  <div id="chatBox"></div>
+  <div class="chips" id="chatQuick" style="margin:8px 0"></div>
+  <div class="row"><input id="chatIn" placeholder="Poochho: aaj kya trend kar raha hai?"><button class="btn pri fit" id="chatSend">➤</button></div>
+</section>
+
+<!-- ============ SETTINGS ============ -->
+<section id="t-set" class="tab">
+  <h1>⚙ Settings</h1>
+  <div class="card">
+    <b>Gemini API key</b> <span class="mut">(script, chat ke liye)</span>
+    <input id="sGem" type="password" placeholder="AIza...">
+    <button class="btn sm" id="tGem" style="margin-top:8px">🧪 Test</button> <span id="rGem" class="mut"></span>
+    <label>Models (comma se alag, pehla fail ho to agla try hota hai)</label><input id="sModels">
+  </div>
+  <div class="card">
+    <b>YouTube Data API key</b> <span class="mut">(sirf trending padhne ke liye, OAuth/refresh token nahi chahiye)</span>
+    <input id="sYt" type="password" placeholder="AIza...">
+    <button class="btn sm" id="tYt" style="margin-top:8px">🧪 Test</button> <span id="rYt" class="mut"></span>
+  </div>
+  <div class="card">
+    <b>Image banane ka tareeka</b>
+    <select id="sImgProv"><option value="pollinations">Free URL service (Pollinations jaisi)</option><option value="gemini">Gemini image (same Gemini key)</option></select>
+    <label>Image URL template ({prompt} {w} {h} {seed})</label><input id="sImgTpl">
+    <label>Gemini image model</label><input id="sGemImg">
+    <button class="btn sm" id="tImg" style="margin-top:8px">🧪 Test image</button> <span id="rImg" class="mut"></span>
+  </div>
+  <div class="card">
+    <b>Narration awaaz</b>
+    <label>Voice URL template ({text} {voice})</label><input id="sTts">
+    <label>Voice naam</label><input id="sVoice">
+    <button class="btn sm" id="tTts" style="margin-top:8px">🧪 Test awaaz</button> <span id="rTts" class="mut"></span>
+  </div>
+  <div class="card">
+    <button class="btn bad" id="btnWipe">🗑 Saare projects hatao</button>
+    <div class="mut" style="margin-top:8px">Anime AI Studio v1.0. Ye app khud kuch upload nahi karta, sirf video file banata hai.</div>
+  </div>
+</section>
+
+</main>
+<nav id="nav">
+  <button data-tab="gen" class="on"><i>✨</i>Banao</button>
+  <button data-tab="edit"><i>🎞</i>Editor</button>
+  <button data-tab="chat"><i>💬</i>Trend AI</button>
+  <button data-tab="set"><i>⚙</i>Settings</button>
+</nav>
+</div>
+
+<div id="xov" class="ov hidden">
+  <h2 id="xovT">Video ban rahi hai</h2>
+  <div class="bar" style="width:90%"><i id="xovBar"></i></div>
+  <div id="xovS" class="mut"></div>
+  <p class="mut">Screen on rakho, app band mat karo.</p>
+  <button class="btn bad" id="xovStop">⏹ Roko</button>
+</div>
+<input type="file" id="fileIn" accept="image/*,video/*" multiple class="hidden">
+<input type="file" id="musicIn" accept="audio/*" class="hidden">
+<input type="file" id="repIn" accept="image/*,video/*" class="hidden">
+<input type="file" id="ovIn" accept="image/*,video/*" class="hidden">
+<input type="file" id="auIn" accept="audio/*" class="hidden">
+<div id="toast"></div>
+<script>
+'use strict';
+/* ================= utils ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const uid=()=>Math.random().toString(36).slice(2,10);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd=n=>{const x=Math.sin(n*12.9898+78.233)*43758.5453;return x-Math.floor(x)};
+const ease=k=>k*k*(3-2*k);
+const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+let toastT;
+function toast(msg,ms=3000){const t=$('#toast');t.textContent=msg;t.style.display='block';clearTimeout(toastT);toastT=setTimeout(()=>t.style.display='none',ms)}
+
+const DEF={models:'gemini-flash-latest,gemini-2.5-flash,gemini-2.0-flash',
+  imgProv:'pollinations',
+  imgTpl:'https://image.pollinations.ai/prompt/{prompt}?width={w}&height={h}&seed={seed}&nologo=true&model=flux',
+  gemImgModel:'gemini-2.5-flash-image',
+  ttsTpl:'https://text.pollinations.ai/{text}?model=openai-audio&voice={voice}',
+  voice:'nova',geminiKey:'',ytKey:'',region:'US',cat:'',plat:'YouTube'};
+const cfg={
+  get(k){try{const v=localStorage.getItem('av_'+k);return v===null?DEF[k]:JSON.parse(v)}catch(e){return DEF[k]}},
+  set(k,v){try{localStorage.setItem('av_'+k,JSON.stringify(v))}catch(e){}}
+};
+
+/* ================= IndexedDB ================= */
+const DB={
+  db:null,
+  async open(){
+    if(this.db)return this.db;
+    this.db=await new Promise((res,rej)=>{
+      const r=indexedDB
